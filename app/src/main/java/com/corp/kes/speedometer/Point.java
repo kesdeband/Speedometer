@@ -7,6 +7,13 @@ public class Point {
     private float z = 0;
     private int cnt = 1;
 
+    public Point(float x, float y, float z, int cnt) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.cnt = cnt;
+    }
+
     public float getX() {
         return x/(float)cnt;
     }
@@ -17,13 +24,6 @@ public class Point {
 
     public float getZ() {
         return z/(float)cnt;
-    }
-
-    public Point(float x, float y, float z, int cnt) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        this.cnt = cnt;
     }
 
     public float getForce(){

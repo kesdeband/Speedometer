@@ -1,5 +1,6 @@
 package com.corp.kes.speedometer;
 
+
 import android.os.Handler;
 
 import java.util.LinkedList;
@@ -13,7 +14,7 @@ public class Calibrator {
     Handler hRefresh;
     Accelerometer acc;
     int eventNumber;
-    private LinkedList calData;
+    private LinkedList<Point> calData;
 
     public Calibrator(Handler hRefresh, Accelerometer acc, int eventNumber) {
         this.hRefresh = hRefresh;
@@ -23,7 +24,7 @@ public class Calibrator {
 
     public void calibrate() {
         final Timer calTimer = new Timer();
-        calData = new LinkedList();
+        calData = new LinkedList<>();
         acc.setdX(0);
         acc.setdY(0);
         acc.setdZ(0);
@@ -52,13 +53,13 @@ public class Calibrator {
                 UPDATE_INTERVAL);
     }
 
-    private void addCalData(LinkedList cD) {
+    private void addCalData(LinkedList<Point> cD) {
         Point p = acc.getPoint();
         cD.add(p);
         acc.reset();
     }
 
-    private void calSensor(LinkedList cD) throws Exception {
+    private void calSensor(LinkedList<Point> cD) throws Exception {
         if (cD.size() < ITERATIONS-1) {
             throw new Exception("not enough data to calibrate");
         }
@@ -67,9 +68,9 @@ public class Calibrator {
         float z = 0;
         // Don't use first measure
         for (int i = 1; i < cD.size(); ++i) {
-           // x += cD.get(i).getX();
-           // y += cD.get(i).getY();
-           // z += cD.get(i).getZ();
+            x += cD.get(i).getX();
+            y += cD.get(i).getY();
+            z += cD.get(i).getZ();
         }
 
         x = x / (cD.size() - 1);

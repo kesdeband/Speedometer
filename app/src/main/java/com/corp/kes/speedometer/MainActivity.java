@@ -2,107 +2,151 @@ package com.corp.kes.speedometer;
 
 import android.content.Context;
 import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 
-public class MainActivity extends ActionBarActivity implements SensorEventListener {
+public class MainActivity extends ActionBarActivity {
 
-    private SensorManager sensorManager;
-    private Sensor sensor;
+    static final int TIMER_DONE = 2;
+    static final int START = 3;
+    static final int CAL_TIMER_DONE = 4;
+    static final int ERROR = 5;
 
-    TextView txt_x_axis;
-    TextView txt_y_axis;
-    TextView txt_z_axis;
-    TextView txt_accuracy;
-    TextView txt_speed;
-    TextView lbl_toggle_btn;
-    Button btnStart;
-    ToggleButton toggleOnOff;
+    //private StarCatcher mStartListener;
+    private Accelerometer xyzAcc;
+    private SensorManager mSensorManager;
+    private static final long UPDATE_INTERVAL = 500;
+    private static final long MEASURE_TIMES = 20;
+    private Timer timer;
+    private TextView tv;
+    private Button testBtn;
+    int counter;
+    private MeasureData mdXYZ;
 
-    boolean sensorStarted = false;
+    /** handler for async events*/
+    Handler hRefresh = new Handler() {
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case TIMER_DONE:
+
+                    onMeasureDone();
+                    String es1 = Float.toString(Math.round(mdXYZ.getLastSpeedKm()*100)/100f);
+                    // tv.append(" END SPEED " + es1 + " " + es2 + " \n");
+                    tv.append(" END SPEED " + es1 + " \n");
+                    enableButtons();
+                    break;
+                case START:
+                    tv.append(" START");
+                    timer = new Timer();
+                    timer.scheduleAtFixedRate(
+                            new TimerTask() {
+
+                                public void run() {
+                                    dumpSensor();
+                                }
+                            },
+                            0,
+                            UPDATE_INTERVAL);
+
+                    break;
+                case ERROR:
+                    Toast.makeText(getApplicationContext(), "ERROR", Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        txt_x_axis = (TextView) this.findViewById(R.id.txt_x_axis);
-        txt_y_axis = (TextView) this.findViewById(R.id.txt_y_axis);
-        txt_z_axis = (TextView) this.findViewById(R.id.txt_z_axis);
-        txt_accuracy = (TextView) this.findViewById(R.id.txt_accuracy);
-        txt_speed = (TextView) this.findViewById(R.id.txt_speed);
-        lbl_toggle_btn = (TextView) this.findViewById(R.id.lbl_toggle_btn);
-
-        btnStart = (Button) this.findViewById(R.id.btnStart);
-        toggleOnOff = (ToggleButton) this.findViewById(R.id.toggleOnOff);
-
-        btnStart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startSensor();
-            }
-        });
-
-        toggleOnOff.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                if(sensorStarted) {
-                    // Is the toggle on?
-                    boolean on = ((ToggleButton) v).isChecked();
-                    if(!on) {
-                        pauseSensor();
-                    } else {
-                        resumeSensor();
-                    }
-                }
-                else {
-                    toggleOnOff.setChecked(false);
-                    Toast.makeText(getApplicationContext(), "Start sensor first", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-        sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
-        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        tv = (TextView) findViewById(R.id.txt);
+        testBtn = (Button) findViewById(R.id.btn);
     }
 
-    public void startSensor() {
-        if(sensor != null) { // Register Listener
-            if(!sensorStarted) {
-                sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
-                toggleOnOff.toggle();
-                sensorStarted = true;
-                Toast.makeText(this, "Accelerometer found", Toast.LENGTH_SHORT).show();
-            }
-            else {
-                Toast.makeText(this, "Use toggle button to pause/resume", Toast.LENGTH_SHORT).show();
-            }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        tv.append("\n ..");
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        setAccelerometer();
+        //setStartCatcher();
+        mSensorManager.registerListener(xyzAcc,
+                mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                SensorManager.SENSOR_DELAY_GAME);
+
+    }
+
+    @Override
+    protected void onPause() {
+        mSensorManager.unregisterListener(xyzAcc);
+        super.onPause();
+    }
+
+    public void onButtonTest(View v) {
+        disableButtons();
+        mdXYZ = new MeasureData(UPDATE_INTERVAL);
+        counter = 0;
+        tv.setText("");
+        tv.append("Calibrating");
+        Calibrator cal = new Calibrator(hRefresh, xyzAcc, START);
+        cal.calibrate();
+
+    }
+
+    void dumpSensor() {
+        ++counter;
+        mdXYZ.addPoint(xyzAcc.getPoint());
+
+        hRefresh.sendEmptyMessage(CAL_TIMER_DONE); // Remember to change this
+
+        if (counter > MEASURE_TIMES) {
+            timer.cancel();
+            hRefresh.sendEmptyMessage(TIMER_DONE);
         }
-        else {
-            Toast.makeText(this, "Accelerometer not found", Toast.LENGTH_SHORT).show();
+
+    }
+
+    private void enableButtons() {
+        testBtn.setEnabled(true);
+
+    }
+
+    private void setAccelerometer() {
+        xyzAcc = new Accelerometer();
+        mSensorManager.registerListener(xyzAcc,
+                mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                SensorManager.SENSOR_DELAY_UI);
+    }
+
+    private void disableButtons() {
+        testBtn.setEnabled(false);
+    }
+
+    private void onMeasureDone() {
+        try {
+            mdXYZ.process();
+            long now = System.currentTimeMillis();
+            mdXYZ.saveExt(this, Long.toString(now) + ".csv");
+        } catch (Throwable ex) {
+            Toast.makeText(this, ex.getMessage(), Toast.LENGTH_SHORT).show();
         }
-    }
-
-    public void pauseSensor() {
-        sensorManager.unregisterListener(this);
-        Toast.makeText(this, "Accelerometer paused", Toast.LENGTH_SHORT).show();
-    }
-
-    public void resumeSensor() {
-        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
-        Toast.makeText(this, "Accleromter resumed", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -125,32 +169,5 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if(sensorStarted && toggleOnOff.isChecked())
-            toggleOnOff.toggle();
-        sensorManager.unregisterListener(this); // unregister listener
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        float x = event.values[0];
-        float y = event.values[1];
-        float z = event.values[2];
-
-        txt_x_axis.setText(String.valueOf(x));
-        txt_y_axis.setText(String.valueOf(y));
-        txt_z_axis.setText(String.valueOf(z));
-
-        long now = System.currentTimeMillis() / 1000;
-        txt_speed.setText(String.valueOf(now));
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        txt_accuracy.setText(String.valueOf(accuracy));
     }
 }
