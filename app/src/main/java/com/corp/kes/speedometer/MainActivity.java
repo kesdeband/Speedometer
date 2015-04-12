@@ -144,6 +144,9 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         txt_x_axis.setText(String.valueOf(x));
         txt_y_axis.setText(String.valueOf(y));
         txt_z_axis.setText(String.valueOf(z));
+
+        long now = System.currentTimeMillis() / 1000;
+        txt_speed.setText(String.valueOf(now));
     }
 
     @Override
