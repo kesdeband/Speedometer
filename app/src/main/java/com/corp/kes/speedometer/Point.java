@@ -27,6 +27,6 @@ public class Point {
     }
 
     public float getForce(){
-        return getX()*getX()+getY()*getY()+getZ()*getZ();
+        return (getX() * getX())+ (getY() * getY()) + (getZ() * getZ());
     }
 }
