@@ -1,6 +1,5 @@
 package com.corp.kes.speedometer;
 
-
 import android.os.Handler;
 
 import java.util.LinkedList;
