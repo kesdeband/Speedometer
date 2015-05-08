@@ -10,7 +10,7 @@ import java.util.LinkedList;
 
 public class MeasureData {
 
-    // points from accelerometr
+    // points from accelerometer
     private LinkedList<Point> accData;
     private LinkedList<MeasurePoint> data;
 
@@ -19,8 +19,8 @@ public class MeasureData {
 
     public MeasureData(long interval) {
         this.interval = interval;
-        accData = new LinkedList<> ();
-        data = new LinkedList<> ();
+        accData = new LinkedList<>();
+        data = new LinkedList<>();
     }
 
     public void addPoint(Point p){

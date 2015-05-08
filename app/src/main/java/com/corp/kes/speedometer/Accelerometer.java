@@ -63,8 +63,8 @@ public class Accelerometer extends SensorType {
 
         if (this.cnt < Accelerometer.BUFFER_SIZE-1) {
             this.cnt++;
-        } else
-        {
+        }
+        else {
             this.reset();
         }
     }

@@ -23,12 +23,20 @@ public class MeasurePoint {
         calc();
     }
 
-    private void calc(){
+    /*private void calc(){
         //Acceleration as projection of current vector on average
         acceleration = this.x*averagePoint.getX() +
                        this.y*averagePoint.getY() +
                        this.z*averagePoint.getZ();
         acceleration = acceleration / ((float)Math.sqrt(averagePoint.getForce()));
+        float t = ((float)interval / 1000f);
+        speedAfter = speedBefore + acceleration * t;
+        distance = speedBefore*t + acceleration*t*t/2;
+    }*/
+
+    private void calc(){
+        //Acceleration as projection of current vector on average
+        acceleration = (float)Math.sqrt(this.x*this.x+this.y*this.y*+this.z*this.z);
         float t = ((float)interval / 1000f);
         speedAfter = speedBefore + acceleration * t;
         distance = speedBefore*t + acceleration*t*t/2;

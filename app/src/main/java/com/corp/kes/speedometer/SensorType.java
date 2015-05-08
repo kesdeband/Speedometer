@@ -9,7 +9,7 @@ public abstract class SensorType implements SensorEventListener {
     protected float lastY;
     protected float lastZ;
 
-    public abstract com.corp.kes.speedometer.Point getPoint();
+    public abstract Point getPoint();
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 }
