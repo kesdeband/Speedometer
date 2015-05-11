@@ -23,7 +23,7 @@ public class MeasurePoint {
         calc();
     }
 
-    /*private void calc(){
+    private void calc(){
         //Acceleration as projection of current vector on average
         acceleration = this.x*averagePoint.getX() +
                        this.y*averagePoint.getY() +
@@ -32,16 +32,16 @@ public class MeasurePoint {
         float t = ((float)interval / 1000f);
         speedAfter = speedBefore + acceleration * t;
         distance = speedBefore*t + acceleration*t*t/2;
-    }*/
+    }
 
-    private void calc(){
+    /*private void calc(){
         //Acceleration as projection of current vector on average
         acceleration = (float)Math.sqrt(this.x*this.x+this.y*this.y*+this.z*this.z);
         float t = ((float)interval / 1000f);
         speedAfter = speedBefore + acceleration * t;
         distance = speedBefore*t + acceleration*t*t/2;
 
-    }
+    }*/
 
     public String getStoreString(){
         return "write here whatever you want";

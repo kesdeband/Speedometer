@@ -30,7 +30,6 @@ public class Calibrator {
 
         calTimer.scheduleAtFixedRate(
                 new TimerTask() {
-
                     public void run() {
                         addCalData(calData);
                         if (calData.size() > ITERATIONS) {

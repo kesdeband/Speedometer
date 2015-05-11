@@ -1,6 +1,7 @@
 package com.corp.kes.speedometer;
 
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
@@ -131,8 +132,8 @@ public class MainActivity extends ActionBarActivity {
     private void setAccelerometer() {
         xyzAcc = new Accelerometer();
         mSensorManager.registerListener(xyzAcc,
-                mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-                SensorManager.SENSOR_DELAY_UI);
+                mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION),
+                SensorManager.SENSOR_DELAY_FASTEST);
     }
 
     private void disableButtons() {
@@ -143,7 +144,7 @@ public class MainActivity extends ActionBarActivity {
         try {
             mdXYZ.process();
             long now = System.currentTimeMillis();
-            mdXYZ.saveExt(this, Long.toString(now) + ".csv");
+            //mdXYZ.saveExt(this, Long.toString(now) + ".csv");
         } catch (Throwable ex) {
             Toast.makeText(this, ex.getMessage(), Toast.LENGTH_SHORT).show();
         }
@@ -165,6 +166,8 @@ public class MainActivity extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, Test.class);
+            startActivity(intent);
             return true;
         }
 
