@@ -5,32 +5,32 @@ import java.util.LinkedList;
 public class MeasureData {
 
     // points from accelerometer
-    private LinkedList<Point> accData;
-    private LinkedList<MeasurePoint> data;
+    private LinkedList<Point> dataPoints;
+    private LinkedList<MeasurePoint> dataMeasurePoints;
 
     // timer interval of generating points
     private long interval;
 
     public MeasureData(long interval) {
         this.interval = interval;
-        accData = new LinkedList<>();
-        data = new LinkedList<>();
+        dataPoints = new LinkedList<>();
+        dataMeasurePoints = new LinkedList<>();
     }
 
     public void addPoint(Point p){
-        accData.add(p);
+        dataPoints.add(p);
     }
 
     public void process(){
 
-        for(int i = 0; i < accData.size(); ++i){
-            Point p = accData.get(i);
+        for(int i = 0; i < dataPoints.size(); ++i){
+            Point p = dataPoints.get(i);
             float speed = 0;
 
             if(i > 0){
-                speed = data.get(i-1).getSpeedAfter();
+                speed = dataMeasurePoints.get(i-1).getSpeedAfter();
             }
-            data.add(new MeasurePoint(p.getX(), p.getY(), p.getZ(), speed, interval, getAveragePoint()));
+            dataMeasurePoints.add(new MeasurePoint(p.getX(), p.getY(), p.getZ(), speed, interval, getAveragePoint()));
         }
     }
 
@@ -39,8 +39,8 @@ public class MeasureData {
         float y = 0;
         float z = 0;
 
-        for(int i = 0; i < accData.size(); ++i){
-            Point p = accData.get(i);
+        for(int i = 0; i < dataPoints.size(); ++i){
+            Point p = dataPoints.get(i);
             x += p.getX();
             y += p.getY();
             z += p.getZ();
@@ -50,7 +50,7 @@ public class MeasureData {
     }
 
     public float getLastSpeed(){
-        return data.getLast().getSpeedAfter();
+        return dataMeasurePoints.getLast().getSpeedAfter();
     }
 
     public float getLastSpeedKm(){
@@ -59,6 +59,14 @@ public class MeasureData {
     }
 
     public float getLastDistance() {
-        return data.getLast().getDistance();
+        return dataMeasurePoints.getLast().getDistance();
+    }
+
+    public float getLastAcceleration() {
+        return dataMeasurePoints.getLast().getAcceleration();
+    }
+
+    public float getTime() {
+        return dataMeasurePoints.getLast().getTime();
     }
 }

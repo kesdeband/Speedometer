@@ -9,7 +9,6 @@ public abstract class SensorType implements SensorEventListener {
     protected float lastY;
     protected float lastZ;
 
-    public abstract Point getPoint();
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 }

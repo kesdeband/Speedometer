@@ -20,11 +20,6 @@ public class Accelerometer extends SensorType {
     public Accelerometer() {
     }
 
-    // returns last SenorEvent parameters
-    public Point getLastPoint(){
-        return new Point(lastX, lastY, lastZ, 1);
-    }
-
     // returns parameters, using buffer: average acceleration
     // since last call of getPoint()
     public Point getPoint(){
@@ -67,10 +62,6 @@ public class Accelerometer extends SensorType {
         else {
             this.reset();
         }
-    }
-
-    public int getCnt(){
-        return cnt;
     }
 
     public void setdX(float dX) {

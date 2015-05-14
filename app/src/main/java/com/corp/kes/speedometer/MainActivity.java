@@ -1,7 +1,6 @@
 package com.corp.kes.speedometer;
 
 import android.content.Context;
-import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
@@ -27,13 +26,18 @@ public class MainActivity extends ActionBarActivity {
     private static final long UPDATE_INTERVAL = 500;
     private static final long MEASURE_TIMES = 20;
 
-    private Accelerometer accelerometer;
     private SensorManager sensorManager;
+    private Accelerometer accelerometer;
+    private MeasureData measureData;
     private Timer timer;
-    private TextView tv;
+    private int counter;
+
     private Button btnStart;
-    int counter;
-    private MeasureData mdXYZ;
+    private TextView tvStatus;
+    private TextView tvDistance;
+    private TextView tvSpeed;
+    private TextView tvTime;
+    private TextView tvAcceleration;
 
     /** handler for async events*/
     Handler handler = new Handler() {
@@ -43,15 +47,19 @@ public class MainActivity extends ActionBarActivity {
             switch (msg.what) {
                 case TIMER_DONE:
                     onMeasureDone();
-                    String es1 = Float.toString(Math.round(mdXYZ.getLastSpeedKm()*100)/100f);
-                    String distance = Float.toString(Math.round(mdXYZ.getLastDistance()*100)/100f);
-                    // tv.append(" END SPEED " + es1 + " " + es2 + " \n");
-                    tv.append(" END SPEED " + es1 + " \n");
-                    tv.append(" Distance " + distance + " \n");
+                    String distance = Float.toString(Math.round(measureData.getLastDistance()*100)/100f);
+                    String speed = Float.toString(Math.round(measureData.getLastSpeedKm()*100)/100f);
+                    String time = Float.toString(Math.round(measureData.getTime()*100)/100f);
+                    String acceleration = Float.toString(Math.round(measureData.getLastAcceleration()*100)/100f);
+                    tvStatus.append(" END SPEED");
+                    tvDistance.append(" " + distance);
+                    tvSpeed.append(" " + speed);
+                    tvTime.append(" " + time);
+                    tvAcceleration.append(" " + acceleration);
                     enableButton();
                     break;
                 case START:
-                    tv.append(" START");
+                    tvStatus.append(" START");
                     timer = new Timer();
                     timer.scheduleAtFixedRate(
                             new TimerTask() {
@@ -74,17 +82,20 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        tv = (TextView) findViewById(R.id.txt);
         btnStart = (Button) findViewById(R.id.btnStart);
-
+        tvStatus = (TextView) findViewById(R.id.tvStatus);
+        tvDistance = (TextView) findViewById(R.id.tvDistance);
+        tvSpeed = (TextView) findViewById(R.id.tvSpeed);
+        tvTime = (TextView) findViewById(R.id.tvTime);
+        tvAcceleration = (TextView) findViewById(R.id.tvAcceleration);
     }
 
     public void onClick(View view) {
         disableButton();
-        mdXYZ = new MeasureData(UPDATE_INTERVAL);
+        measureData = new MeasureData(UPDATE_INTERVAL);
         counter = 0;
-        tv.setText("");
-        tv.append("Calibrating");
+        tvStatus.setText("");
+        tvStatus.append("Calibrating");
         Calibrator cal = new Calibrator(handler, accelerometer, START);
         cal.calibrate();
     }
@@ -98,16 +109,15 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        tv.append("\n ..");
+        //tv.append("\n ..");
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         setAccelerometer();
-        //setStartCatcher();
         sensorManager.registerListener(accelerometer, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST);
     }
 
     void dumpSensor() {
         ++counter;
-        mdXYZ.addPoint(accelerometer.getPoint());
+        measureData.addPoint(accelerometer.getPoint());
 
         //handler.sendEmptyMessage(TICK); // Remember to change this
 
@@ -133,7 +143,7 @@ public class MainActivity extends ActionBarActivity {
 
     private void onMeasureDone() {
         try {
-            mdXYZ.process();
+            measureData.process();
             //long now = System.currentTimeMillis();
             //mdXYZ.saveExt(this, Long.toString(now) + ".csv");
         } catch (Throwable ex) {
@@ -157,9 +167,6 @@ public class MainActivity extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            // TODO: Remove this
-            Intent intent = new Intent(this, Test.class);
-            startActivity(intent);
             return true;
         }
 

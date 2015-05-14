@@ -8,42 +8,42 @@ import java.util.TimerTask;
 
 public class Calibrator {
 
-    final static int UPDATE_INTERVAL = 400;
+    final static int UPDATE_INTERVAL = 500;
     final static int ITERATIONS = 5;
-    Handler hRefresh;
-    Accelerometer acc;
-    int eventNumber;
-    private LinkedList<Point> calData;
+    private Handler handler;
+    private Accelerometer accelerometer;
+    private int eventNumber;
+    private LinkedList<Point> dataPoints;
 
-    public Calibrator(Handler hRefresh, Accelerometer acc, int eventNumber) {
-        this.hRefresh = hRefresh;
-        this.acc = acc;
+    public Calibrator(Handler handler, Accelerometer accelerometer, int eventNumber) {
+        this.handler = handler;
+        this.accelerometer = accelerometer;
         this.eventNumber = eventNumber;
     }
 
     public void calibrate() {
-        final Timer calTimer = new Timer("calibrate");
-        calData = new LinkedList<>();
-        acc.setdX(0);
-        acc.setdY(0);
-        acc.setdZ(0);
+        final Timer timer = new Timer("calibrate");
+        dataPoints = new LinkedList<>();
+        accelerometer.setdX(0);
+        accelerometer.setdY(0);
+        accelerometer.setdZ(0);
 
-        calTimer.scheduleAtFixedRate(
+        timer.scheduleAtFixedRate(
                 new TimerTask() {
                     public void run() {
-                        addCalData(calData);
-                        if (calData.size() > ITERATIONS) {
-                            calTimer.cancel();
+                        addCalData(dataPoints);
+                        if (dataPoints.size() > ITERATIONS) {
+                            timer.cancel();
                             try {
-                                calSensor(calData);
+                                calSensor(dataPoints);
                             } catch (Exception ex) {
                                 try {
                                     throw ex;
                                 } catch (Exception ex1) {
-                                    hRefresh.sendEmptyMessage(5);
+                                    handler.sendEmptyMessage(MainActivity.ERROR);
                                 }
                             }
-                            hRefresh.sendEmptyMessage(eventNumber);
+                            handler.sendEmptyMessage(eventNumber);
                         }
                     }
                 },
@@ -52,9 +52,9 @@ public class Calibrator {
     }
 
     private void addCalData(LinkedList<Point> cD) {
-        Point p = acc.getPoint();
+        Point p = accelerometer.getPoint();
         cD.add(p);
-        acc.reset();
+        accelerometer.reset();
     }
 
     private void calSensor(LinkedList<Point> cD) throws Exception {
@@ -75,8 +75,8 @@ public class Calibrator {
         y = y / (cD.size() - 1);
         z = z / (cD.size() - 1);
 
-        acc.setdX(-x);
-        acc.setdY(-y);
-        acc.setdZ(-z);
+        accelerometer.setdX(-x);
+        accelerometer.setdY(-y);
+        accelerometer.setdZ(-z);
     }
 }
