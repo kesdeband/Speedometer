@@ -22,7 +22,7 @@ public class Calibrator {
     }
 
     public void calibrate() {
-        final Timer calTimer = new Timer();
+        final Timer calTimer = new Timer("calibrate");
         calData = new LinkedList<>();
         acc.setdX(0);
         acc.setdY(0);

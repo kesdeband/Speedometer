@@ -33,7 +33,7 @@ public class Accelerometer extends SensorType {
             return new Point(lastX, lastY, lastZ, 1);
         }
 
-        Point p =  new Point(X, Y, Z, cnt);
+        Point p = new Point(X, Y, Z, cnt);
 
         reset();
         return p;

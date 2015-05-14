@@ -21,49 +21,46 @@ import java.util.TimerTask;
 
 public class MainActivity extends ActionBarActivity {
 
-    static final int TIMER_DONE = 2;
-    static final int START = 3;
-    static final int CAL_TIMER_DONE = 4;
-    static final int ERROR = 5;
-
-    //private StarCatcher mStartListener;
-    private Accelerometer xyzAcc;
-    private SensorManager mSensorManager;
+    static final int TIMER_DONE = 1;
+    static final int START = 2;
+    static final int ERROR = 3;
     private static final long UPDATE_INTERVAL = 500;
     private static final long MEASURE_TIMES = 20;
+
+    private Accelerometer accelerometer;
+    private SensorManager sensorManager;
     private Timer timer;
     private TextView tv;
-    private Button testBtn;
+    private Button btnStart;
     int counter;
     private MeasureData mdXYZ;
 
     /** handler for async events*/
-    Handler hRefresh = new Handler() {
+    Handler handler = new Handler() {
 
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case TIMER_DONE:
-
                     onMeasureDone();
                     String es1 = Float.toString(Math.round(mdXYZ.getLastSpeedKm()*100)/100f);
+                    String distance = Float.toString(Math.round(mdXYZ.getLastDistance()*100)/100f);
                     // tv.append(" END SPEED " + es1 + " " + es2 + " \n");
                     tv.append(" END SPEED " + es1 + " \n");
-                    enableButtons();
+                    tv.append(" Distance " + distance + " \n");
+                    enableButton();
                     break;
                 case START:
                     tv.append(" START");
                     timer = new Timer();
                     timer.scheduleAtFixedRate(
                             new TimerTask() {
-
                                 public void run() {
                                     dumpSensor();
                                 }
                             },
                             0,
                             UPDATE_INTERVAL);
-
                     break;
                 case ERROR:
                     Toast.makeText(getApplicationContext(), "ERROR", Toast.LENGTH_SHORT).show();
@@ -78,72 +75,66 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
 
         tv = (TextView) findViewById(R.id.txt);
-        testBtn = (Button) findViewById(R.id.btn);
+        btnStart = (Button) findViewById(R.id.btnStart);
+
+    }
+
+    public void onClick(View view) {
+        disableButton();
+        mdXYZ = new MeasureData(UPDATE_INTERVAL);
+        counter = 0;
+        tv.setText("");
+        tv.append("Calibrating");
+        Calibrator cal = new Calibrator(handler, accelerometer, START);
+        cal.calibrate();
+    }
+
+    @Override
+    protected void onPause() {
+        sensorManager.unregisterListener(accelerometer);
+        super.onPause();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         tv.append("\n ..");
-        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         setAccelerometer();
         //setStartCatcher();
-        mSensorManager.registerListener(xyzAcc,
-                mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-                SensorManager.SENSOR_DELAY_GAME);
-
-    }
-
-    @Override
-    protected void onPause() {
-        mSensorManager.unregisterListener(xyzAcc);
-        super.onPause();
-    }
-
-    public void onButtonTest(View v) {
-        disableButtons();
-        mdXYZ = new MeasureData(UPDATE_INTERVAL);
-        counter = 0;
-        tv.setText("");
-        tv.append("Calibrating");
-        Calibrator cal = new Calibrator(hRefresh, xyzAcc, START);
-        cal.calibrate();
-
+        sensorManager.registerListener(accelerometer, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST);
     }
 
     void dumpSensor() {
         ++counter;
-        mdXYZ.addPoint(xyzAcc.getPoint());
+        mdXYZ.addPoint(accelerometer.getPoint());
 
-        hRefresh.sendEmptyMessage(CAL_TIMER_DONE); // Remember to change this
+        //handler.sendEmptyMessage(TICK); // Remember to change this
 
         if (counter > MEASURE_TIMES) {
             timer.cancel();
-            hRefresh.sendEmptyMessage(TIMER_DONE);
+            handler.sendEmptyMessage(TIMER_DONE);
         }
 
     }
 
-    private void enableButtons() {
-        testBtn.setEnabled(true);
+    private void enableButton() {
+        btnStart.setEnabled(true);
+    }
 
+    private void disableButton() {
+        btnStart.setEnabled(false);
     }
 
     private void setAccelerometer() {
-        xyzAcc = new Accelerometer();
-        mSensorManager.registerListener(xyzAcc,
-                mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION),
-                SensorManager.SENSOR_DELAY_FASTEST);
-    }
-
-    private void disableButtons() {
-        testBtn.setEnabled(false);
+        accelerometer = new Accelerometer();
+        sensorManager.registerListener(accelerometer, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST);
     }
 
     private void onMeasureDone() {
         try {
             mdXYZ.process();
-            long now = System.currentTimeMillis();
+            //long now = System.currentTimeMillis();
             //mdXYZ.saveExt(this, Long.toString(now) + ".csv");
         } catch (Throwable ex) {
             Toast.makeText(this, ex.getMessage(), Toast.LENGTH_SHORT).show();
@@ -166,6 +157,7 @@ public class MainActivity extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            // TODO: Remove this
             Intent intent = new Intent(this, Test.class);
             startActivity(intent);
             return true;

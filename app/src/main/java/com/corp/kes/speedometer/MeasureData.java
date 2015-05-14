@@ -34,27 +34,6 @@ public class MeasureData {
         }
     }
 
-    /*public boolean saveExt(Context con, String fname) throws Throwable {
-
-        try {
-
-            File file = new File(con.getExternalFilesDir(null), fname);
-            FileOutputStream os = new FileOutputStream(file);
-            OutputStreamWriter out = new OutputStreamWriter(os);
-
-
-            for (int i = 0; i < data.size(); ++i) {
-                MeasurePoint m = data.get(i);
-                out.write(m.getStoreString());
-            }
-
-            out.close();
-        } catch (Exception exception) {
-            Log.d("error", exception.getMessage());
-        }
-        return true;
-    }*/
-
     private Point getAveragePoint() {
         float x = 0;
         float y = 0;
@@ -77,5 +56,9 @@ public class MeasureData {
     public float getLastSpeedKm(){
         float ms = getLastSpeed();
         return ms*3.6f;
+    }
+
+    public float getLastDistance() {
+        return data.getLast().getDistance();
     }
 }

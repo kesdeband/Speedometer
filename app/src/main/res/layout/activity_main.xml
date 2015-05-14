@@ -6,10 +6,10 @@
 
     <Button
         android:id="@+id/btn"
-        android:text="TEST"
+        android:text="START"
         android:layout_width="300px"
         android:layout_height="200px"
-        android:onClick="onButtonTest"
+        android:onClick="onClick"
         android:layout_gravity="center_horizontal" />
 
     <TextView
