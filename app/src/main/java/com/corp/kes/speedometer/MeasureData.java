@@ -22,15 +22,15 @@ public class MeasureData {
     }
 
     public void process(){
-
+        float speedBefore = 0;
         for(int i = 0; i < dataPoints.size(); ++i){
             Point p = dataPoints.get(i);
-            float speed = 0;
-
+            float tempSpeed = 0;
+            int j;
             if(i > 0){
-                speed = dataMeasurePoints.get(i-1).getSpeedAfter();
+                speedBefore = dataMeasurePoints.get(i - 1).getSpeedAfter();
             }
-            dataMeasurePoints.add(new MeasurePoint(p.getX(), p.getY(), p.getZ(), speed, interval, getAveragePoint()));
+            dataMeasurePoints.add(new MeasurePoint(p.getX(), p.getY(), p.getZ(), speedBefore, interval, getAveragePoint()));
         }
     }
 
@@ -49,24 +49,38 @@ public class MeasureData {
         return new Point(x, y, z, 1);
     }
 
-    public float getLastSpeed(){
+    // Return speed before in metres per second
+    public float getInitialSpeed(){
+        return dataMeasurePoints.getLast().getSpeedBefore();
+    }
+
+    // Return speed in metres per second
+    public float getFinalSpeed(){
         return dataMeasurePoints.getLast().getSpeedAfter();
     }
 
-    public float getLastSpeedKm(){
-        float ms = getLastSpeed();
-        return ms*3.6f;
+    // Return speed in kilometres per hour
+    public float getLastSpeedKm() {
+        return getFinalSpeed() * 3.6f;
     }
 
-    public float getLastDistance() {
+    // Return distance in metres
+    public float getLastDistanceM() {
         return dataMeasurePoints.getLast().getDistance();
     }
 
+    // Return acceleration in m/s
     public float getLastAcceleration() {
         return dataMeasurePoints.getLast().getAcceleration();
     }
 
-    public float getTime() {
+    // Return time in seconds
+    public float getTimeSec() {
         return dataMeasurePoints.getLast().getTime();
+    }
+
+    // Return time in hours
+    public float getTimeHr() {
+        return getTimeSec() * 0.000277778f;
     }
 }

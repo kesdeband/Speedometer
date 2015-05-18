@@ -35,7 +35,8 @@ public class MainActivity extends ActionBarActivity {
     private Button btnStart;
     private TextView tvStatus;
     private TextView tvDistance;
-    private TextView tvSpeed;
+    private TextView tvSpeedInitial;
+    private TextView tvSpeedFinal;
     private TextView tvTime;
     private TextView tvAcceleration;
 
@@ -47,13 +48,15 @@ public class MainActivity extends ActionBarActivity {
             switch (msg.what) {
                 case TIMER_DONE:
                     onMeasureDone();
-                    String distance = Float.toString(Math.round(measureData.getLastDistance()*100)/100f);
-                    String speed = Float.toString(Math.round(measureData.getLastSpeedKm()*100)/100f);
-                    String time = Float.toString(Math.round(measureData.getTime()*100)/100f);
-                    String acceleration = Float.toString(Math.round(measureData.getLastAcceleration()*100)/100f);
-                    tvStatus.append(" END SPEED");
+                    String distance = Float.toString(Math.round(measureData.getLastDistanceM()*1000)/1000f);
+                    String speedInitial = Float.toString(Math.round(measureData.getInitialSpeed()*1000)/1000f);
+                    String speedFinal = Float.toString(Math.round(measureData.getFinalSpeed()*1000)/1000f);
+                    String time = Float.toString(Math.round(measureData.getTimeSec()*1000)/1000f);
+                    String acceleration = Float.toString(Math.round(measureData.getLastAcceleration()*1000)/1000f);
+                    tvStatus.append(" END");
                     tvDistance.append(" " + distance);
-                    tvSpeed.append(" " + speed);
+                    tvSpeedInitial.append(" " + speedInitial);
+                    tvSpeedFinal.append(" " + speedFinal);
                     tvTime.append(" " + time);
                     tvAcceleration.append(" " + acceleration);
                     enableButton();
@@ -85,7 +88,8 @@ public class MainActivity extends ActionBarActivity {
         btnStart = (Button) findViewById(R.id.btnStart);
         tvStatus = (TextView) findViewById(R.id.tvStatus);
         tvDistance = (TextView) findViewById(R.id.tvDistance);
-        tvSpeed = (TextView) findViewById(R.id.tvSpeed);
+        tvSpeedInitial = (TextView) findViewById(R.id.tvSpeedInitial);
+        tvSpeedFinal = (TextView) findViewById(R.id.tvSpeedFinal);
         tvTime = (TextView) findViewById(R.id.tvTime);
         tvAcceleration = (TextView) findViewById(R.id.tvAcceleration);
     }
@@ -95,9 +99,14 @@ public class MainActivity extends ActionBarActivity {
         measureData = new MeasureData(UPDATE_INTERVAL);
         counter = 0;
         tvStatus.setText("");
+        tvDistance.setText("Distance :");
+        tvSpeedInitial.setText("I-Speed :");
+        tvSpeedFinal.setText("F-Speed :");
+        tvTime.setText("Time :");
+        tvAcceleration.setText("Acceleration: ");
         tvStatus.append("Calibrating");
-        Calibrator cal = new Calibrator(handler, accelerometer, START);
-        cal.calibrate();
+        Calibrator calibrator = new Calibrator(handler, accelerometer, START);
+        calibrator.calibrate();
     }
 
     @Override
@@ -118,8 +127,6 @@ public class MainActivity extends ActionBarActivity {
     void dumpSensor() {
         ++counter;
         measureData.addPoint(accelerometer.getPoint());
-
-        //handler.sendEmptyMessage(TICK); // Remember to change this
 
         if (counter > MEASURE_TIMES) {
             timer.cancel();
@@ -144,10 +151,8 @@ public class MainActivity extends ActionBarActivity {
     private void onMeasureDone() {
         try {
             measureData.process();
-            //long now = System.currentTimeMillis();
-            //mdXYZ.saveExt(this, Long.toString(now) + ".csv");
-        } catch (Throwable ex) {
-            Toast.makeText(this, ex.getMessage(), Toast.LENGTH_SHORT).show();
+        } catch (Exception ex) {
+            Toast.makeText(this, String.valueOf(ex.getMessage()), Toast.LENGTH_SHORT).show();
         }
     }
 

@@ -2,7 +2,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_height="fill_parent"
+    android:paddingLeft="5dp"
+    android:paddingRight="5dp"
+    android:paddingTop="5dp">
 
     <Button
         android:layout_width="wrap_content"
@@ -12,10 +15,15 @@
         android:onClick="onClick"
         android:layout_gravity="center_horizontal" />
 
+    <Space
+        android:layout_width="20px"
+        android:layout_height="20px" />
+
     <TextView
         android:id = "@+id/tvStatus"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:gravity="center" />
 
     <TextView
         android:id = "@+id/tvDistance"
@@ -24,10 +32,16 @@
         android:text="Distance :" />
 
     <TextView
-        android:id = "@+id/tvSpeed"
+        android:id = "@+id/tvSpeedInitial"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Speed :" />
+        android:text="I-Speed :" />
+
+    <TextView
+        android:id = "@+id/tvSpeedFinal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="F-Speed :" />
 
     <TextView
         android:id = "@+id/tvTime"

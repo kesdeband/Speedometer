@@ -27,9 +27,13 @@ public class MeasurePoint {
         // Acceleration as projection of current vector on average
         acceleration = (this.x * this.averagePoint.getX()) + (this.y * averagePoint.getY()) + (this.z * averagePoint.getZ());
         acceleration = acceleration / ((float) Math.sqrt(this.averagePoint.getForce()));
-        //float t = ((float)interval / 1000f);
         speedAfter = speedBefore + (acceleration * time);
         distance = (speedBefore * time) + ((acceleration * time * time)/2);
+        //Log.d("speedBefore", String.valueOf(speedBefore));
+    }
+
+    public float getSpeedBefore() {
+        return this.speedBefore;
     }
 
     public float getSpeedAfter() {
